@@ -63,8 +63,8 @@ public class CustomerRepository(DataContext context, IAddressRepository repo) : 
         .Include(c => c.CustomerAddresses)
           .ThenInclude(c => c.Address)
           .ThenInclude(c => c.AddressType)
-        .Include(c => c.OrderItems)
-          .ThenInclude(o => o.Product)
+        .Include(c => c.CustomerOrders)
+          .ThenInclude(o => o.SalesOrder)
         .Include(c => c.OrderItems)
           .ThenInclude(o => o.SalesOrder)
 

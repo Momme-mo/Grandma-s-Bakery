@@ -11,7 +11,7 @@ using eshop.api.Data;
 namespace eshop.api.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250221143449_InitialCreate")]
+    [Migration("20250221145938_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -288,6 +288,21 @@ namespace eshop.api.Data.Migrations
                     b.ToTable("CustomerAddresses");
                 });
 
+            modelBuilder.Entity("eshop.api.Entities.CustomerOrders", b =>
+                {
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SalesOrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CustomerId", "SalesOrderId");
+
+                    b.HasIndex("SalesOrderId");
+
+                    b.ToTable("CustomerOrders");
+                });
+
             modelBuilder.Entity("eshop.api.Entities.OrderItem", b =>
                 {
                     b.Property<int>("ProductId")
@@ -308,17 +323,11 @@ namespace eshop.api.Data.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("SalesOrderId1")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("ProductId", "SalesOrderId");
 
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("SalesOrderId");
-
-                    b.HasIndex("SalesOrderId1")
-                        .IsUnique();
 
                     b.ToTable("OrderItems");
                 });
@@ -474,6 +483,25 @@ namespace eshop.api.Data.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("eshop.api.Entities.CustomerOrders", b =>
+                {
+                    b.HasOne("eshop.api.Entities.Customer", "Customer")
+                        .WithMany("CustomerOrders")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("eshop.api.Entities.SalesOrder", "SalesOrder")
+                        .WithMany()
+                        .HasForeignKey("SalesOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("SalesOrder");
+                });
+
             modelBuilder.Entity("eshop.api.Entities.OrderItem", b =>
                 {
                     b.HasOne("eshop.api.Entities.Customer", "Customer")
@@ -494,10 +522,6 @@ namespace eshop.api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("eshop.api.Entities.SalesOrder", null)
-                        .WithOne("OrderItem")
-                        .HasForeignKey("eshop.api.Entities.OrderItem", "SalesOrderId1");
-
                     b.Navigation("Customer");
 
                     b.Navigation("Product");
@@ -507,11 +531,9 @@ namespace eshop.api.Data.Migrations
 
             modelBuilder.Entity("eshop.api.Entities.SalesOrder", b =>
                 {
-                    b.HasOne("eshop.api.Entities.Customer", "Customer")
+                    b.HasOne("eshop.api.Entities.Customer", null)
                         .WithMany("SalesOrders")
                         .HasForeignKey("CustomerId");
-
-                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("eshop.api.Entities.Address", b =>
@@ -527,6 +549,8 @@ namespace eshop.api.Data.Migrations
             modelBuilder.Entity("eshop.api.Entities.Customer", b =>
                 {
                     b.Navigation("CustomerAddresses");
+
+                    b.Navigation("CustomerOrders");
 
                     b.Navigation("OrderItems");
 
@@ -545,8 +569,6 @@ namespace eshop.api.Data.Migrations
 
             modelBuilder.Entity("eshop.api.Entities.SalesOrder", b =>
                 {
-                    b.Navigation("OrderItem");
-
                     b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618

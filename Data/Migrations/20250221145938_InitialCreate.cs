@@ -263,6 +263,30 @@ namespace eshop.api.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CustomerOrders",
+                columns: table => new
+                {
+                    CustomerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    SalesOrderId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomerOrders", x => new { x.CustomerId, x.SalesOrderId });
+                    table.ForeignKey(
+                        name: "FK_CustomerOrders_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CustomerOrders_SalesOrders_SalesOrderId",
+                        column: x => x.SalesOrderId,
+                        principalTable: "SalesOrders",
+                        principalColumn: "SalesOrderId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OrderItems",
                 columns: table => new
                 {
@@ -271,8 +295,7 @@ namespace eshop.api.Data.Migrations
                     CustomerId = table.Column<int>(type: "INTEGER", nullable: false),
                     OrderDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Quantity = table.Column<int>(type: "INTEGER", nullable: false),
-                    Price = table.Column<double>(type: "REAL", nullable: false),
-                    SalesOrderId1 = table.Column<int>(type: "INTEGER", nullable: true)
+                    Price = table.Column<double>(type: "REAL", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -295,11 +318,6 @@ namespace eshop.api.Data.Migrations
                         principalTable: "SalesOrders",
                         principalColumn: "SalesOrderId",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_OrderItems_SalesOrders_SalesOrderId1",
-                        column: x => x.SalesOrderId1,
-                        principalTable: "SalesOrders",
-                        principalColumn: "SalesOrderId");
                 });
 
             migrationBuilder.CreateTable(
@@ -379,6 +397,11 @@ namespace eshop.api.Data.Migrations
                 column: "CustomerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CustomerOrders_SalesOrderId",
+                table: "CustomerOrders",
+                column: "SalesOrderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_CustomerId",
                 table: "OrderItems",
                 column: "CustomerId");
@@ -387,12 +410,6 @@ namespace eshop.api.Data.Migrations
                 name: "IX_OrderItems_SalesOrderId",
                 table: "OrderItems",
                 column: "SalesOrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrderItems_SalesOrderId1",
-                table: "OrderItems",
-                column: "SalesOrderId1",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_SalesOrders_CustomerId",
@@ -420,6 +437,9 @@ namespace eshop.api.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "CustomerAddresses");
+
+            migrationBuilder.DropTable(
+                name: "CustomerOrders");
 
             migrationBuilder.DropTable(
                 name: "OrderItems");

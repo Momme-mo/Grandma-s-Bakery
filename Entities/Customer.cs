@@ -8,7 +8,7 @@ public class Customer
   public string Email { get; set; }
   public string Phone { get; set; }
 
-  public IList<SalesOrder> SalesOrders { get; set; }
   public IList<CustomerAddress> CustomerAddresses { get; set; }
   public IList<OrderItem> OrderItems { get; set; }
+  public IList<CustomerOrders> Orders { get; set; }
 }

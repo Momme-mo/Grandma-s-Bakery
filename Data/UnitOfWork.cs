@@ -1,6 +1,8 @@
 
 
 using eshop.api.Data;
+using eshop.api.Interfaces;
+using eshop.api.Repositories;
 
 namespace eshop.api;
 
@@ -12,6 +14,8 @@ public class UnitOfWork(DataContext context, IAddressRepository repo) : IUnitOfW
   public ICustomerRepository CustomerRepository => new CustomerRepository(_context, _repo);
 
   public IAddressRepository AddressRepository => new AddressRepository(_context);
+
+  public IOrderRepository OrderRepository => new OrderRepository(_context);
 
   public async Task<bool> Complete()
   {

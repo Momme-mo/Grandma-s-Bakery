@@ -7,7 +7,7 @@ namespace eshop.api.Data;
 public class DataContext(DbContextOptions options) : IdentityDbContext(options)
 {
   public DbSet<Product> Products { get; set; }
-  public DbSet<SalesOrder> SalesOrders { get; set; }
+  public DbSet<CustomerOrders> Orders { get; set; }
   public DbSet<OrderItem> OrderItems { get; set; }
   public DbSet<Customer> Customers { get; set; }
   public DbSet<Address> Addresses { get; set; }
@@ -18,22 +18,21 @@ public class DataContext(DbContextOptions options) : IdentityDbContext(options)
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     modelBuilder.Entity<OrderItem>().HasKey(o => new { o.ProductId, o.SalesOrderId });
+
     modelBuilder.Entity<CustomerAddress>().HasKey(c => new { c.AddressId, c.CustomerId });
+
+    modelBuilder.Entity<CustomerOrders>().HasKey(c => new { c.CustomerId, c.SalesOrderId });
+
     modelBuilder.Entity<Product>()
     .HasMany(p => p.OrderItems)
     .WithOne(d => d.Product)
     .HasForeignKey(o => o.ProductId);
 
-    modelBuilder.Entity<SalesOrder>()
-    .HasMany(s => s.OrderItems)
-    .WithOne(o => o.SalesOrder)
-    .HasForeignKey(s => s.SalesOrderId);
-
     modelBuilder.Entity<Customer>()
-    .HasMany(c => c.OrderItems)
+    .HasMany(c => c.Orders)
     .WithOne(o => o.Customer)
-    .HasForeignKey(c => c.CustomerId);
-    
+    .HasForeignKey(o => o.CustomerId);
+
     base.OnModelCreating(modelBuilder);
   }
 }
