@@ -1,0 +1,30 @@
+[
+  {
+    "itemNumber": "10",
+    "productName": "Grillkrydda",
+    "price": 0.0,
+    "image": "grillkrydda.jpg",
+    "description": "Krydda för det mesta med grillkrydda."
+  },
+  {
+    "itemNumber": "20",
+    "productName": "Mjölk",
+    "price": 0.0,
+    "image": "mjölk.jpg",
+    "description": "God mjölk"
+  },
+  {
+    "itemNumber": "30",
+    "productName": "Ägg",
+    "price": 0.0,
+    "image": "ägg.jpg",
+    "description": "Ägg från bonden nära dig."
+  },
+  {
+    "itemNumber": "140",
+    "productName": "Mjöl",
+    "price": 0.0,
+    "image": "mjöl.jpg",
+    "description": "Svenskt närproducerat mjöl."
+  }
+]
