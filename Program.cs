@@ -1,10 +1,6 @@
-using System.Text;
 using eshop.api;
 using eshop.api.Data;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,21 +25,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Aktivera inloggningssäkerhet(Authentication)...
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-  .AddJwtBearer(options =>
-  {
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-      ValidateIssuer = false,
-      ValidateAudience = false,
-      ValidateLifetime = true,
-      ValidateIssuerSigningKey = true,
-      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("tokenSettings:tokenKey").Value))
-    };
-  });
-
-builder.Services.AddAuthorization();
 
 // Pipeline...
 var app = builder.Build();
