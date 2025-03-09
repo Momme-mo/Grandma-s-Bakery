@@ -1,59 +1,61 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using eshop.api.Data;
+using eshop.api.Entities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace eshop.api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CustomersController(IUnitOfWork unitOfWork) : ControllerBase
+public class CustomersController(DataContext context) : ControllerBase
 {
-  private readonly IUnitOfWork _unitOfWork = unitOfWork;
+  private readonly DataContext _context = context;
 
-  [HttpGet()]
-  public async Task<ActionResult> GetAllCustomers()
+  [HttpGet]
+  public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
   {
-    var customers = await _unitOfWork.CustomerRepository.List();
-    return Ok(new { success = true, data = customers });
+    return await _context.Customers.ToListAsync();
   }
 
   [HttpGet("{id}")]
-  public async Task<ActionResult> GetCustomer(int id)
+  public async Task<ActionResult<Customer>> GetCustomer(int id)
   {
-    try
+    var customer = await _context.Customers
+      .Include(c => c.CustomerOrders)
+      .ThenInclude(o => o.OrderItems)
+      .ThenInclude(oi => oi.Product)
+      .FirstOrDefaultAsync(c => c.CustomerId == id);
+
+    if (customer == null)
     {
-      return Ok(new { success = true, data = await _unitOfWork.CustomerRepository.Find(id) });
+      return NotFound(new { success = false, message = "Customer not found with the id number: {id}." });
     }
-    catch (Exception ex)
-    {
-      return NotFound(new { success = false, message = ex.Message });
-    }
+
+    return Ok(new { success = true, StatusCode = 200, data = customer });
   }
 
   [HttpPost()]
-  public async Task<ActionResult> AddCustomer(CustomerPostViewModel model)
+  public async Task<ActionResult<Customer>> AddCustomer(Customer customer)
   {
-    try
+    _context.Customers.Add(customer);
+    await _context.SaveChangesAsync();
+
+    return CreatedAtAction(nameof(GetCustomer), new { id = customer.CustomerId }, customer);
+  }
+
+  [HttpPut("{id}")]
+  public async Task<IActionResult> ChangeCustomer(int id, string ChangeCustomer)
+  {
+    var customer = await _context.Customers.FindAsync(id);
+    if (customer == null)
     {
-      var result = await _unitOfWork.CustomerRepository.Add(model);
-      if (result)
-      {
-        if (await _unitOfWork.Complete())
-        {
-          return StatusCode(201);
-        }
-        else
-        {
-          return StatusCode(500);
-        }
-      }
-      else
-      {
-        return BadRequest();
-      }
-    }
-    catch (Exception ex)
-    {
-      return BadRequest(ex.Message);
+      return NotFound(new { success = true, StatusCode = 404, message = $"Customer not found with the id number: {id}."});
     }
 
+    customer.FirstName = ChangeCustomer;
+    customer.LastName = ChangeCustomer;
+    await _context.SaveChangesAsync();
+
+    return NoContent();
   }
 }

@@ -69,6 +69,7 @@ namespace eshop.api.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    CustomerId = table.Column<int>(type: "INTEGER", nullable: false),
                     FirstName = table.Column<string>(type: "TEXT", nullable: true),
                     LastName = table.Column<string>(type: "TEXT", nullable: true),
                     Email = table.Column<string>(type: "TEXT", nullable: true),
@@ -99,11 +100,12 @@ namespace eshop.api.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    ItemNumber = table.Column<string>(type: "TEXT", nullable: true),
+                    ProductId = table.Column<int>(type: "INTEGER", nullable: false),
                     ProductName = table.Column<string>(type: "TEXT", nullable: true),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    Price = table.Column<decimal>(type: "TEXT", nullable: false),
-                    Image = table.Column<string>(type: "TEXT", nullable: true)
+                    PricePerUnit = table.Column<double>(type: "REAL", nullable: false),
+                    ItemNumber = table.Column<string>(type: "TEXT", nullable: true),
+                    BestBeforeDate = table.Column<string>(type: "TEXT", nullable: true),
+                    ManufacturingDate = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -217,22 +219,25 @@ namespace eshop.api.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SalesOrders",
+                name: "CustomerOrders",
                 columns: table => new
                 {
-                    SalesOrderId = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    OrderDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CustomerId = table.Column<int>(type: "INTEGER", nullable: true)
+                    OrderId = table.Column<int>(type: "INTEGER", nullable: false),
+                    OrderNumber = table.Column<string>(type: "TEXT", nullable: true),
+                    CustomerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    OrderDate = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SalesOrders", x => x.SalesOrderId);
+                    table.PrimaryKey("PK_CustomerOrders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SalesOrders_Customers_CustomerId",
+                        name: "FK_CustomerOrders_Customers_CustomerId",
                         column: x => x.CustomerId,
                         principalTable: "Customers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -263,47 +268,24 @@ namespace eshop.api.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CustomerOrders",
-                columns: table => new
-                {
-                    CustomerId = table.Column<int>(type: "INTEGER", nullable: false),
-                    SalesOrderId = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CustomerOrders", x => new { x.CustomerId, x.SalesOrderId });
-                    table.ForeignKey(
-                        name: "FK_CustomerOrders_Customers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CustomerOrders_SalesOrders_SalesOrderId",
-                        column: x => x.SalesOrderId,
-                        principalTable: "SalesOrders",
-                        principalColumn: "SalesOrderId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "OrderItems",
                 columns: table => new
                 {
-                    SalesOrderId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    OrderItemId = table.Column<int>(type: "INTEGER", nullable: false),
+                    OrderId = table.Column<int>(type: "INTEGER", nullable: false),
                     ProductId = table.Column<int>(type: "INTEGER", nullable: false),
-                    CustomerId = table.Column<int>(type: "INTEGER", nullable: false),
-                    OrderDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Quantity = table.Column<int>(type: "INTEGER", nullable: false),
-                    Price = table.Column<double>(type: "REAL", nullable: false)
+                    TotalPrice = table.Column<double>(type: "REAL", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderItems", x => new { x.ProductId, x.SalesOrderId });
+                    table.PrimaryKey("PK_OrderItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_OrderItems_Customers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customers",
+                        name: "FK_OrderItems_CustomerOrders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "CustomerOrders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -311,12 +293,6 @@ namespace eshop.api.Data.Migrations
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_OrderItems_SalesOrders_SalesOrderId",
-                        column: x => x.SalesOrderId,
-                        principalTable: "SalesOrders",
-                        principalColumn: "SalesOrderId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -397,24 +373,19 @@ namespace eshop.api.Data.Migrations
                 column: "CustomerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CustomerOrders_SalesOrderId",
+                name: "IX_CustomerOrders_CustomerId",
                 table: "CustomerOrders",
-                column: "SalesOrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrderItems_CustomerId",
-                table: "OrderItems",
                 column: "CustomerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderItems_SalesOrderId",
+                name: "IX_OrderItems_OrderId",
                 table: "OrderItems",
-                column: "SalesOrderId");
+                column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SalesOrders_CustomerId",
-                table: "SalesOrders",
-                column: "CustomerId");
+                name: "IX_OrderItems_ProductId",
+                table: "OrderItems",
+                column: "ProductId");
         }
 
         /// <inheritdoc />
@@ -439,9 +410,6 @@ namespace eshop.api.Data.Migrations
                 name: "CustomerAddresses");
 
             migrationBuilder.DropTable(
-                name: "CustomerOrders");
-
-            migrationBuilder.DropTable(
                 name: "OrderItems");
 
             migrationBuilder.DropTable(
@@ -454,10 +422,10 @@ namespace eshop.api.Data.Migrations
                 name: "Addresses");
 
             migrationBuilder.DropTable(
-                name: "Products");
+                name: "CustomerOrders");
 
             migrationBuilder.DropTable(
-                name: "SalesOrders");
+                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "AddressTypes");

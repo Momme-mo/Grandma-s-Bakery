@@ -253,6 +253,9 @@ namespace eshop.api.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Email")
                         .HasColumnType("TEXT");
 
@@ -285,27 +288,10 @@ namespace eshop.api.Data.Migrations
                     b.ToTable("CustomerAddresses");
                 });
 
-            modelBuilder.Entity("eshop.api.Entities.CustomerOrders", b =>
+            modelBuilder.Entity("eshop.api.Entities.CustomerOrder", b =>
                 {
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SalesOrderId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("CustomerId", "SalesOrderId");
-
-                    b.HasIndex("SalesOrderId");
-
-                    b.ToTable("CustomerOrders");
-                });
-
-            modelBuilder.Entity("eshop.api.Entities.OrderItem", b =>
-                {
-                    b.Property<int>("ProductId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SalesOrderId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("CustomerId")
@@ -314,17 +300,45 @@ namespace eshop.api.Data.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<double>("Price")
-                        .HasColumnType("REAL");
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("OrderNumber")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("CustomerOrders");
+                });
+
+            modelBuilder.Entity("eshop.api.Entities.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OrderItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("ProductId", "SalesOrderId");
+                    b.Property<double>("TotalPrice")
+                        .HasColumnType("REAL");
 
-                    b.HasIndex("CustomerId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("SalesOrderId");
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("OrderItems");
                 });
@@ -352,17 +366,20 @@ namespace eshop.api.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Image")
+                    b.Property<string>("BestBeforeDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ItemNumber")
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("Price")
+                    b.Property<string>("ManufacturingDate")
                         .HasColumnType("TEXT");
+
+                    b.Property<double>("PricePerUnit")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ProductName")
                         .HasColumnType("TEXT");
@@ -370,25 +387,6 @@ namespace eshop.api.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("eshop.api.Entities.SalesOrder", b =>
-                {
-                    b.Property<int>("SalesOrderId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("CustomerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("OrderDate")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("SalesOrderId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.ToTable("SalesOrders");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -480,7 +478,7 @@ namespace eshop.api.Data.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("eshop.api.Entities.CustomerOrders", b =>
+            modelBuilder.Entity("eshop.api.Entities.CustomerOrder", b =>
                 {
                     b.HasOne("eshop.api.Entities.Customer", "Customer")
                         .WithMany("CustomerOrders")
@@ -488,22 +486,14 @@ namespace eshop.api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("eshop.api.Entities.SalesOrder", "SalesOrder")
-                        .WithMany()
-                        .HasForeignKey("SalesOrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Customer");
-
-                    b.Navigation("SalesOrder");
                 });
 
             modelBuilder.Entity("eshop.api.Entities.OrderItem", b =>
                 {
-                    b.HasOne("eshop.api.Entities.Customer", "Customer")
+                    b.HasOne("eshop.api.Entities.CustomerOrder", "CustomerOrder")
                         .WithMany("OrderItems")
-                        .HasForeignKey("CustomerId")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -513,24 +503,9 @@ namespace eshop.api.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("eshop.api.Entities.SalesOrder", "SalesOrder")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("SalesOrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
+                    b.Navigation("CustomerOrder");
 
                     b.Navigation("Product");
-
-                    b.Navigation("SalesOrder");
-                });
-
-            modelBuilder.Entity("eshop.api.Entities.SalesOrder", b =>
-                {
-                    b.HasOne("eshop.api.Entities.Customer", null)
-                        .WithMany("SalesOrders")
-                        .HasForeignKey("CustomerId");
                 });
 
             modelBuilder.Entity("eshop.api.Entities.Address", b =>
@@ -548,10 +523,11 @@ namespace eshop.api.Data.Migrations
                     b.Navigation("CustomerAddresses");
 
                     b.Navigation("CustomerOrders");
+                });
 
+            modelBuilder.Entity("eshop.api.Entities.CustomerOrder", b =>
+                {
                     b.Navigation("OrderItems");
-
-                    b.Navigation("SalesOrders");
                 });
 
             modelBuilder.Entity("eshop.api.Entities.PostalAddress", b =>
@@ -560,11 +536,6 @@ namespace eshop.api.Data.Migrations
                 });
 
             modelBuilder.Entity("eshop.api.Entities.Product", b =>
-                {
-                    b.Navigation("OrderItems");
-                });
-
-            modelBuilder.Entity("eshop.api.Entities.SalesOrder", b =>
                 {
                     b.Navigation("OrderItems");
                 });

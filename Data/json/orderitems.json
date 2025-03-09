@@ -1,20 +1,26 @@
 [
   {
-    "salesOrderId": 1,
+    "id": 1,
+    "orderItemId": 1,
+    "orderId": 1,
     "productId": 1,
     "quantity": 1,
-    "price": 29.95
+    "totalPrice": 29.95
   },
   {
-    "salesOrderId": 1,
+    "id": 2,
+    "orderItemId": 2,
+    "orderId": 1,
     "productId": 2,
-    "quantity": 4,
-    "price": 32.95
+    "quantity": 2,
+    "totalPrice": 9.95
   },
   {
-    "salesOrderId": 2,
-    "productId": 3,
-    "quantity": 12,
-    "price": 28.95
+    "id": 3,
+    "orderItemId": 3,
+    "orderId": 2,
+    "productId": 1,
+    "quantity": 1,
+    "totalPrice": 29.95
   }
 ]

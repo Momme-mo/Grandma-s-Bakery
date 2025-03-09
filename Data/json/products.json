@@ -1,30 +1,30 @@
 [
   {
     "itemNumber": "10",
-    "productName": "Grillkrydda",
-    "price": 0.0,
-    "image": "grillkrydda.jpg",
-    "description": "Krydda för det mesta med grillkrydda."
+    "productName": "Grill krydda",
+    "pricePerUnit": 150.0,
+    "bestBeforeDate": "2025-11-5",
+    "manufacturingDate": "2024-12-24"
+  },
+  {
+    "itemNumber": "15",
+    "productName": "Svartpeppar",
+    "pricePerUnit": 70.0,
+    "bestBeforeDate": "2025-10-10",
+    "manufacturingDate": "2024-12-24"
   },
   {
     "itemNumber": "20",
-    "productName": "Mjölk",
-    "price": 0.0,
-    "image": "mjölk.jpg",
-    "description": "God mjölk"
+    "productName": "Bakpulver",
+    "pricePerUnit": 50.0,
+    "bestBeforeDate": "2025-6-16",
+    "manufacturingDate": "2024-12-24"
   },
   {
-    "itemNumber": "30",
-    "productName": "Ägg",
-    "price": 0.0,
-    "image": "ägg.jpg",
-    "description": "Ägg från bonden nära dig."
-  },
-  {
-    "itemNumber": "140",
-    "productName": "Mjöl",
-    "price": 0.0,
-    "image": "mjöl.jpg",
-    "description": "Svenskt närproducerat mjöl."
+    "itemNumber": "25",
+    "productName": "Vaniljsocker",
+    "pricePerUnit": 200.0,
+    "bestBeforeDate": "2025-9-20",
+    "manufacturingDate": "2024-12-24"
   }
 ]

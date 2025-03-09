@@ -5,13 +5,13 @@ namespace eshop.api.Data;
 
 public static class Seed
 {
-  private static readonly JsonSerializerOptions options = new()
-  {
-    PropertyNameCaseInsensitive = true
-  };
-
   public static async Task LoadProducts(DataContext context)
   {
+    var options = new JsonSerializerOptions
+    {
+      PropertyNameCaseInsensitive = true
+    };
+
     if (context.Products.Any()) return;
 
     var json = File.ReadAllText("Data/json/products.json");
@@ -24,27 +24,32 @@ public static class Seed
     }
   }
 
-  public static async Task LoadSalesOrders(DataContext context)
+  public static async Task LoadCustomerOrders(DataContext context)
   {
-    // var options = new JsonSerializerOptions
-    // {
-    //   PropertyNameCaseInsensitive = true
-    // };
+    var options = new JsonSerializerOptions
+    {
+      PropertyNameCaseInsensitive = true
+    };
 
-    if (context.SalesOrders.Any()) return;
+    if (context.CustomerOrders.Any()) return;
 
-    var json = File.ReadAllText("Data/json/orders.json");
-    var orders = JsonSerializer.Deserialize<List<SalesOrder>>(json, options);
+    var json = File.ReadAllText("Data/json/customerorders.json");
+    var orders = JsonSerializer.Deserialize<List<CustomerOrder>>(json, options);
 
     if (orders is not null && orders.Count > 0)
     {
-      await context.SalesOrders.AddRangeAsync(orders);
+      await context.CustomerOrders.AddRangeAsync(orders);
       await context.SaveChangesAsync();
     }
   }
 
   public static async Task LoadOrderItems(DataContext context)
   {
+    var options = new JsonSerializerOptions
+    {
+      PropertyNameCaseInsensitive = true
+    };
+    
     if (context.OrderItems.Any()) return;
 
     var json = File.ReadAllText("Data/json/orderitems.json");
@@ -59,6 +64,11 @@ public static class Seed
 
   public static async Task LoadAddressTypes(DataContext context)
   {
+    var options = new JsonSerializerOptions
+    {
+      PropertyNameCaseInsensitive = true
+    };
+
     if (context.AddressTypes.Any()) return;
 
     var json = await File.ReadAllTextAsync("Data/json/addressTypes.json");

@@ -3,12 +3,14 @@ namespace eshop.api.Entities;
 public class Product
 {
   public int Id { get; set; }
-  public string ItemNumber { get; set; }
+  public int ProductId { get; set; }
   public string ProductName { get; set; }
-  public string Description { get; set; }
-  public decimal Price { get; set; }
-  public string Image { get; set; }
+  public double PricePerUnit { get; set; }
+  public string ItemNumber { get; set; }
+  public string BestBeforeDate { get; set; }
+  public string ManufacturingDate { get; set; }
 
   // Navigational property...
-  public IList<OrderItem> OrderItems { get; set; }
+  public IList<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+  
 }

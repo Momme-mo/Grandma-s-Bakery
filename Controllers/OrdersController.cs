@@ -1,152 +1,173 @@
-using eshop.api.Data;
-using eshop.api.Entities;
-using eshop.api.ViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using eshop.api.Data;
+using eshop.api.ViewModels.Orders;
+using eshop.api.Entities;
 
 namespace eshop.api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize()]
 public class OrdersController(DataContext context) : ControllerBase
 {
-  private readonly DataContext _context = context;
+    private readonly DataContext _context = context;
 
-  [HttpGet()]
-  public async Task<ActionResult> ListAllOrders()
-  {
-    // DEKLARATIV PROGRAMMERING❗️
-    // När vi hämtar alla SalesOrder objekt
-    // ta med dig alla OrderItems objekt också
-    var orders = await _context.SalesOrders
-      .Include(c => c.OrderItems) // Vi måste nu projicera datat till det format som vi vill leverera tillbaka...
-      .Select(order => new
-      {
-        OrderNumber = order.SalesOrderId,
-        order.OrderDate,
-        OrderItems = order.OrderItems // Nu måste projicera vad vi vill/behöver ifrån OrderItems!!!
-          .Select(item => new
-          {
-            item.Product.ProductName,
-            item.Price,
-            item.Quantity,
-            LineSum = item.Price * item.Quantity
-          })
-      })
-      .ToListAsync();
 
-    return Ok(new { success = true, statusCode = 200, data = orders });
-  }
-
-  // Hämta ut all information om en specifik beställning baserat orderns id...
-  [HttpGet("{id}")]
-  public async Task<ActionResult> FindOrder(int id)
-  {
-    var order = await _context.SalesOrders
-      .Where(o => o.SalesOrderId == id)
-      .Include(c => c.OrderItems)
-      .Select(order => new
-      {
-        OrderNumber = order.SalesOrderId,
-        order.OrderDate,
-        OrderItems = order.OrderItems
-          .Select(item => new
-          {
-            item.Product.ProductName,
-            item.Price,
-            item.Quantity,
-            LineSum = item.Price * item.Quantity
-          })
-      })
-      .SingleOrDefaultAsync();
-
-    if (order is null)
+    [HttpGet]
+    public async Task<ActionResult> ListAllOrders()
     {
-      return NotFound(new { success = false, statusCode = 404, message = $"Tyvärr vi kunde inte hitta någon beställning med ordernummer: {id}" });
-    }
-    return Ok(new { success = true, statusCode = 200, data = order });
-  }
+        var orders = await _context.CustomerOrders
+            .Include(o => o.Customer)
+            .Include(o => o.OrderItems)
+            .Select(order => new
+            {
+                OrderNumber = order.OrderNumber,
+                order.Customer.FirstName,
+                order.Customer.LastName,
+                Products = order.OrderItems.Select(item => new
+                {
+                    item.Product.ProductName,
+                    item.TotalPrice,
+                    item.Quantity,
+                    LineSum = item.TotalPrice * item.Quantity
+                })
+            })
+            .ToListAsync();
 
-  [HttpPost()]
-  public async Task<ActionResult> AddOrder(SalesOrderViewModel order)
-  {
-    var newOrder = new SalesOrder
-    {
-      OrderDate = order.OrderDate,
-      OrderItems = []
-    };
-
-    // TODO: Försäkra oss om att inte samma produkt är inskickad mer än en gång!!!
-
-    foreach (var product in order.Products)
-    {
-      var prod = await _context.Products.SingleOrDefaultAsync(p => p.Id == product.ProductId);
-
-      if (prod is null) return BadRequest($"Du har angivet ett produkt id som inte existerar");
-
-      var item = new OrderItem
-      {
-        Price = product.Price,
-        Quantity = product.Quantity,
-        ProductId = product.ProductId
-      };
-      newOrder.OrderItems.Add(item);
+        return Ok(new { success = true, StatusCode = 200, data = orders });
     }
 
-    try
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult> FindOrder(int id)
     {
-      await _context.SalesOrders.AddAsync(newOrder);
-      await _context.SaveChangesAsync();
+        var order = await _context.CustomerOrders
+            .Where(o => o.OrderId == id)
+            .Include(o => o.Customer)
+            .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.Product)
+            .Select(order => new
+            {
+                order = order.OrderId,
+                CustomerName = order.Customer.FirstName + " " + order.Customer.LastName,
+                Products = order.OrderItems.Select(item => new
+                {
+                    item.Product.ProductName,
+                    item.TotalPrice,
+                    item.Quantity,
+                    LineSum = item.TotalPrice * item.Quantity
+                })
+            })
+            .SingleOrDefaultAsync();
 
-      return CreatedAtAction(nameof(FindOrder), new { id = newOrder.SalesOrderId }, new
-      {
-        newOrder.SalesOrderId,
-        newOrder.OrderDate
-      });
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine(ex.Message);
-      return BadRequest();
-    }
+        if (order is null)
+        {
+            return NotFound(new { success = false, StatusCode = 404, message = $"Order could not be found with the id number: {id}."  });
+        }
 
-  }
-
-  [HttpPut("{id}")]
-  public async Task<ActionResult> UpdateOrder(int id, SalesOrderViewModel order)
-  {
-    var orderToUpdate = await _context.SalesOrders
-    .Where(c => c.SalesOrderId == id)
-    .Include(o => o.OrderItems)
-    .SingleOrDefaultAsync();
-
-    if (orderToUpdate is null) return BadRequest($"Det finns ingen beställning med ordernummer {id}");
-
-    orderToUpdate.OrderDate = order.OrderDate;
-
-    foreach (var item in order.Products)
-    {
-      foreach (var orderItem in orderToUpdate.OrderItems)
-      {
-        orderItem.Price = item.Price;
-        orderItem.Quantity = item.Quantity;
-      }
+        return Ok(new { success = true, StatusCode = 200, data = order });
     }
 
-    await _context.SaveChangesAsync();
-    return NoContent();
-  }
 
-  [HttpDelete("{id}")]
-  public async Task<ActionResult> DeleteOrder(int id)
-  {
-    var toDelete = await _context.SalesOrders.FindAsync(id);
-    _context.SalesOrders.Remove(toDelete);
-    await _context.SaveChangesAsync();
+    [HttpPost]
+    public async Task<ActionResult> AddOrder(OrderViewModel orderModel)
+    {
+        var newCustomerOrder = new CustomerOrder
+        {
+            OrderNumber = orderModel.OrderNumber,
+            CustomerId = orderModel.CustomerId,
+            OrderDate = DateTime.Now,
+            OrderItems = new List<OrderItem>()
+        };
 
-    return NoContent();
-  }
+        foreach (var product in orderModel.orderItems)
+        {
+            var prod = await _context.Products.FindAsync(product.ProductId);
+            if (prod == null)
+            {
+                return BadRequest(new { success = false, StatusCode = 400, message = $"Product with ID: {product.ProductId} could not be found." });
+            }
+
+            var orderItem = new OrderItem
+            {
+                ProductId = product.ProductId,
+                Quantity = product.Quantity,
+                TotalPrice = (double)product.TotalPrice * product.Quantity
+            };
+
+            newCustomerOrder.OrderItems.Add(orderItem);
+        }
+
+        try
+        {
+            _context.CustomerOrders.Add(newCustomerOrder);
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, StatusCode = 201, message = "Order has been made." });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return BadRequest(new { success = false, StatusCode = 500, message = "An error occurred while crating order." });
+        }
+    }
+
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult> UpdateOrder(int id, OrderViewModel order)
+    {
+        var orderToUpdate = await _context.CustomerOrders
+        .Where(c => c.OrderId == id)
+        .Include(o => o.OrderItems)
+        .SingleOrDefaultAsync();
+
+        if (orderToUpdate is null) return BadRequest($"There is no order with this ordernumber {id}");
+
+        orderToUpdate.OrderDate = order.OrderDate;
+
+        foreach (var item in order.orderItems)
+        {
+            foreach (var orderItem in orderToUpdate.OrderItems)
+            {
+                orderItem.TotalPrice = item.TotalPrice;
+                orderItem.Quantity = item.Quantity;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteOrder(int id)
+    {
+         await _context.OrderItems.FindAsync(id);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+    [HttpGet("SökaOrderNumber/{OrderId}")]
+    public async Task<IActionResult> sökaoderNumber(string orderNumber)
+    {
+        var order = await _context.CustomerOrders
+            .Include(o => o.Customer)
+            .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.Product)
+            .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber);
+
+        if (order == null) return NotFound();
+        return Ok(order);
+    }
+    [HttpGet("SearhByDate/{date}")]
+    public async Task<IActionResult> SearchbyDate(DateTime date)
+    {
+        var orders = await _context.CustomerOrders
+            .Include(o => o.Customer)
+            .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.Product)
+            .Where(o => o.OrderDate.Date == date.Date)
+            .ToListAsync();
+
+        return Ok(orders);
+    }
 
 }
