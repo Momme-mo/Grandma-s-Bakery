@@ -1,14 +1,14 @@
 [
   {
-    "OrderId": 1,
-    "OrderNumber": "123",
-    "OrderDate": "2021-01-01",
-    "CustomerId": 1
+    "id": 1,
+    "customerId": 1,
+    "orderNumber": "123",
+    "orderDate": "2021-01-01"
   },
   {
-    "OrderId": 2,
-    "OrderNumber": "222",
-    "OrderDate": "2021-01-02",
-    "CustomerId": 2
+    "id": 2,
+    "customerId": 2,
+    "orderNumber": "222",
+    "orderDate": "2021-01-02"
   }
 ]

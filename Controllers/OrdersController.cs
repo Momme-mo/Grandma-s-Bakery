@@ -42,13 +42,13 @@ public class OrdersController(DataContext context) : ControllerBase
     public async Task<ActionResult> FindOrder(int id)
     {
         var order = await _context.CustomerOrders
-            .Where(o => o.OrderId == id)
+            .Where(o => o.Id == id)
             .Include(o => o.Customer)
             .Include(o => o.OrderItems)
             .ThenInclude(oi => oi.Product)
             .Select(order => new
             {
-                order = order.OrderId,
+                order = order.Id,
                 CustomerName = order.Customer.FirstName + " " + order.Customer.LastName,
                 Products = order.OrderItems.Select(item => new
                 {
@@ -116,7 +116,7 @@ public class OrdersController(DataContext context) : ControllerBase
     public async Task<ActionResult> UpdateOrder(int id, OrderViewModel order)
     {
         var orderToUpdate = await _context.CustomerOrders
-        .Where(c => c.OrderId == id)
+        .Where(c => c.Id == id)
         .Include(o => o.OrderItems)
         .SingleOrDefaultAsync();
 

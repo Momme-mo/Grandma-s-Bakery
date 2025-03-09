@@ -1,26 +1,26 @@
 [
   {
     "id": 1,
-    "orderItemId": 1,
+    "orderItemId": 10,
     "orderId": 1,
     "productId": 1,
     "quantity": 1,
-    "totalPrice": 29.95
+    "totalPrice": 150.0
   },
   {
     "id": 2,
-    "orderItemId": 2,
+    "orderItemId": 15,
     "orderId": 1,
     "productId": 2,
     "quantity": 2,
-    "totalPrice": 9.95
+    "totalPrice": 140.0
   },
   {
     "id": 3,
-    "orderItemId": 3,
+    "orderItemId": 25,
     "orderId": 2,
     "productId": 1,
     "quantity": 1,
-    "totalPrice": 29.95
+    "totalPrice": 200.0
   }
 ]

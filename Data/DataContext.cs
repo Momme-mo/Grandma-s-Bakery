@@ -1,15 +1,12 @@
 using eshop.api.Entities;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace eshop.api.Data;
 
-public class DataContext : IdentityDbContext
-{
-  public DataContext(DbContextOptions<DataContext> options) : base(options)
-  {
-  }
 
+
+  public class DataContext(DbContextOptions options) : DbContext(options)
+  {
   public DbSet<Product> Products { get; set; }
   public DbSet<CustomerOrder> CustomerOrders { get; set; }
   public DbSet<OrderItem> OrderItems { get; set; }
@@ -18,18 +15,23 @@ public class DataContext : IdentityDbContext
   public DbSet<PostalAddress> PostalAddresses { get; set; }
   public DbSet<AddressType> AddressTypes { get; set; }
   public DbSet<CustomerAddress> CustomerAddresses { get; set; }
-
+  
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
-    modelBuilder.Entity<CustomerOrder>()
-    .HasOne(o => o.Customer)
-    .WithMany(c => c.CustomerOrders)
-    .HasForeignKey(o => o.CustomerId);
+    // modelBuilder.Entity<CustomerOrder>()
+    // .HasKey(c => c.Id);
 
-    modelBuilder.Entity<CustomerOrder>()
-    .HasMany(o => o.OrderItems)
-    .WithOne(oi => oi.CustomerOrder)
-    .HasForeignKey(oi => oi.OrderId);
+    // modelBuilder.Entity<CustomerOrder>()
+    // .HasOne(o => o.Customer)
+    // .WithMany(c => c.CustomerOrders)
+    // .HasForeignKey(o => o.CustomerId);
+
+    modelBuilder.Entity<CustomerOrder>().HasKey(c => new { c.Id, c.CustomerId });
+
+    // modelBuilder.Entity<CustomerOrder>()
+    // .HasMany(o => o.OrderItems)
+    // .WithOne(oi => oi.CustomerOrder)
+    // .HasForeignKey(oi => oi.OrderId);
 
     modelBuilder.Entity<OrderItem>()
     .HasOne(o => o.Product)

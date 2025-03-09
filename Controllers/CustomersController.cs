@@ -24,7 +24,7 @@ public class CustomersController(DataContext context) : ControllerBase
       .Include(c => c.CustomerOrders)
       .ThenInclude(o => o.OrderItems)
       .ThenInclude(oi => oi.Product)
-      .FirstOrDefaultAsync(c => c.CustomerId == id);
+      .FirstOrDefaultAsync(c => c.Id == id);
 
     if (customer == null)
     {
@@ -40,7 +40,7 @@ public class CustomersController(DataContext context) : ControllerBase
     _context.Customers.Add(customer);
     await _context.SaveChangesAsync();
 
-    return CreatedAtAction(nameof(GetCustomer), new { id = customer.CustomerId }, customer);
+    return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customer);
   }
 
   [HttpPut("{id}")]
